@@ -21,12 +21,17 @@ auth.post('/signup', async (c) => {
         if (existingUser) {
             return c.text("User already exist")
         }
-        const x=await createToken(c, data)
-        console.log(x);
-        
-        return c.text("Hello")
+        const token=await createToken(c, data)
+        const user=await prisma.user.create({
+            data:{
+                email:data.email,
+                password:data.password,
+                token
+            }
+        })
+        return c.json(user,200)
     } catch (error) {
-        console.log(error);
+        return c.json("Something went wrong while creating user",500)
     }
 });
 
