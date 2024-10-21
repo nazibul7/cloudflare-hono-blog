@@ -42,4 +42,15 @@ auth.post('/signup', async (c) => {
 });
 
 //Signin route
+
+auth.post('/signin',async(c)=>{
+    try {
+        const prisma = getPrisma(c.env.DATABASE_URL)
+        // console.log(prisma);
+        return c.json("ok")
+    } catch (error) {
+        console.log('something went wrong');
+        
+    }
+})
 export default auth;
