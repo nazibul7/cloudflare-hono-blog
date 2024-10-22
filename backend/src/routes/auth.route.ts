@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { getPrisma } from '../db/prisma.function';
 import { createToken } from '../utils/createToken';
-import z from "zod"
+import z, { ZodError } from "zod"
 import { Bindings } from '../utils/types';
 const auth = new Hono<{ Bindings: Bindings }>();
 
@@ -34,7 +34,7 @@ auth.post('/signup', async (c) => {
         return c.json(user, 200)
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return c.json({ message: "Validation error", details: error.errors[1].message }, 400);
+            return c.json({ message: "Validation error", details: error.errors[0].message }, 400);
         } else {
             return c.json("Something went wrong while creating user", 500);
         }
@@ -43,14 +43,30 @@ auth.post('/signup', async (c) => {
 
 //Signin route
 
-auth.post('/signin',async(c)=>{
+auth.post('/signin', async (c) => {
     try {
+        const jsonData = await c.req.json()
+        const data = AuthSchema.parse(jsonData)
         const prisma = getPrisma(c.env.DATABASE_URL)
-        // console.log(prisma);
-        return c.json("ok")
+        const existingUser = await prisma.user.findUnique({
+            where: { email: data.email }
+        })
+        if (!existingUser) {
+            return c.json("User not found, need to signin", 404)
+        }
+        if (data.email !== existingUser.email) {
+            return c.json("Wrong email or User is not registered", 400)
+        }
+        if (data.password == existingUser.password) {
+            const token = await createToken(c, existingUser)
+            return c.json({ message: "SignIn successfull", token }, 200)
+        }
     } catch (error) {
-        console.log('something went wrong');
-        
+        if (error instanceof ZodError) {
+            return c.json({ message: "Validation error", details: error.errors[0].message}, 400);
+        } else {
+            return c.json("Something went wrong while login user", 500);
+        }
     }
 })
 export default auth;
