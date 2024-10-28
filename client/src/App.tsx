@@ -7,6 +7,7 @@ function App() {
     <Routes>
       <Route path="/signup" element={<SignUp/>}/>
       <Route path="/signin" element={<SignIn/>}/>
+      <Route path="/" element={<p>Home Page</p>}/>
       <Route path="*" element={"404 Not Found"}/>
     </Routes>
   )
