@@ -3,6 +3,8 @@ import { getPrisma } from '../db/prisma.function';
 import { createToken } from '../utils/createToken';
 import z, { ZodError } from "zod"
 import { Bindings } from '../utils/types';
+import bcrypt from "bcryptjs"
+
 const auth = new Hono<{ Bindings: Bindings }>();
 
 const AuthSchema = z.object({
@@ -24,10 +26,11 @@ auth.post('/signup', async (c) => {
             return c.text("User already exist")
         }
         const token = await createToken(c, data)
+        const hashPassword = await bcrypt.hash(data.password, 10)
         const user = await prisma.user.create({
             data: {
                 email: data.email,
-                password: data.password,
+                password: hashPassword,
                 token
             }
         })
@@ -57,13 +60,16 @@ auth.post('/signin', async (c) => {
         if (data.email !== existingUser.email) {
             return c.json("Wrong email or User is not registered", 400)
         }
-        if (data.password == existingUser.password) {
-            const token = await createToken(c, existingUser)
-            return c.json({ message: "SignIn successfull", token }, 200)
+        const password = await bcrypt.compare(data.password, existingUser.password)
+        if (!password) {
+            return c.json("Password does not match", 403)
         }
+        const token = await createToken(c, existingUser)
+        return c.json({ message: "SignIn successfull", token }, 200)
+
     } catch (error) {
         if (error instanceof ZodError) {
-            return c.json({ message: "Validation error", details: error.errors[0].message}, 400);
+            return c.json({ message: "Validation error", details: error.errors[0].message }, 400);
         } else {
             return c.json("Something went wrong while login user", 500);
         }
