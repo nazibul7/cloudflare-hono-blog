@@ -1,6 +1,6 @@
 import z from "zod"
 export const UserAuthSchema = z.object({
-    email: z.string().email(),
+    email: z.string().trim().email(),
     password: z.string().min(6, "Password length should be minimun of 6")
 })
 

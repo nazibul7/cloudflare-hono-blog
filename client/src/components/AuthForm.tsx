@@ -1,14 +1,28 @@
 import React, { useState } from "react";
-import { AuthProp } from "../types";
+import { AuthProp, UserAuthSchema } from "../types";
+import { ZodError } from "zod";
 
 export default function AuthForm({ title, miniTitle, miniButton, button, handleSubmit }: AuthProp) {
     const [data, setData] = useState({ email: "", password: "" })
+    const [errors, setErrors] = useState({ email: "", password: "" })
 
-    const onChangeHandler = (event:React.ChangeEvent<HTMLInputElement>) => {
-        setData({ ...data, [event.target.name]:event.target.value})
+    const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setData({ ...data, [event.target.name]: event.target.value })
+        setErrors({ ...errors, [event.target.name]: '' })
     }
-    const onClickhandler = () => { 
-        handleSubmit(data)
+    const onClickhandler = () => {
+        try {
+            const parseData = UserAuthSchema.parse(data)
+            handleSubmit(parseData)
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const newErrors = { email: '', password: '' }
+                error.errors.forEach(err => {
+                    newErrors[err.path[0] as "email" | "password"] = err.message
+                })
+                setErrors({ email: newErrors.email || "", password: newErrors.password || "" })
+            }
+        }
     }
     return (
         <div className="h-screen mx-auto flex items-center justify-center max-w-[700px]">
@@ -21,10 +35,12 @@ export default function AuthForm({ title, miniTitle, miniButton, button, handleS
                     <div className="flex flex-col gap-2">
                         <label className="font-semibold" htmlFor="email">Email</label>
                         <input name="email" value={data.email} onChange={onChangeHandler} className="border border-gray-400 rounded-md p-2" type="email" placeholder="Enter your email" id="email" />
+                        {errors.email && <span className="text-red-500 text-xs mt-[-7px]">{errors.email}</span>}
                     </div>
                     <div className="flex flex-col gap-2">
                         <label htmlFor="password">Password</label>
                         <input name="password" value={data.password} onChange={onChangeHandler} className="border border-gray-400 rounded-md p-2" type="password" placeholder="Enter your password" id="password" />
+                        {errors.password && <span className="text-red-500 text-xs mt-[-7px]" >{errors.password}</span>}
                     </div>
                 </div>
                 <div className="my-6 flex">
