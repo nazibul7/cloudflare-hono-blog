@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { setCookie } from "hono/cookie"
 import { getPrisma } from '../db/prisma.function';
 import { createToken } from '../utils/createToken';
 import z, { ZodError } from "zod"
@@ -34,6 +35,13 @@ auth.post('/signup', async (c) => {
                 token
             }
         })
+        setCookie(c, 'token', token, {
+            httpOnly: true,
+            secure: true,
+            path: '/',
+            sameSite: "Strict",
+            maxAge: 24 * 24 * 60
+        })
         return c.json(user, 200)
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -65,6 +73,13 @@ auth.post('/signin', async (c) => {
             return c.json("Password does not match", 403)
         }
         const token = await createToken(c, existingUser)
+        setCookie(c, 'token', token, {
+            httpOnly: true,
+            secure: true,
+            path: '/',
+            sameSite: "Strict",
+            maxAge: 24 * 24 * 60
+        })
         return c.json({ message: "SignIn successfull", token }, 200)
 
     } catch (error) {
