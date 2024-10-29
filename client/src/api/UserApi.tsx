@@ -23,7 +23,9 @@ export const useSignin = () => {
             })
             return response.data
         } catch (error) {
-            return error as ReceviedPropType
+            console.log(error);
+            throw error
+            // return error as ReceviedPropType
         }
     }
     return signin

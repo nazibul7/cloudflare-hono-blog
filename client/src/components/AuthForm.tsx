@@ -2,19 +2,20 @@ import React, { useState } from "react";
 import { AuthProp, UserAuthSchema } from "../types";
 import { ZodError } from "zod";
 
-export default function AuthForm({ title, miniTitle, miniButton, button, handleSubmit }: AuthProp) {
+export default function AuthForm({ title, miniTitle, miniButton, button, errorMessage, handleSubmit }: AuthProp) {
     const [data, setData] = useState({ email: "", password: "" })
     const [errors, setErrors] = useState({ email: "", password: "" })
-
+    const [loading, setLoading] = useState(false)
+   
     const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         setData({ ...data, [event.target.name]: event.target.value })
         setErrors({ ...errors, [event.target.name]: '' })
     }
-    const onClickhandler = () => {
+    const onClickhandler = async () => {
         try {
             const parseData = UserAuthSchema.parse(data)
-            handleSubmit(parseData)
-            
+            setLoading(true)
+            await handleSubmit(parseData)
         } catch (error) {
             if (error instanceof ZodError) {
                 const newErrors = { email: '', password: '' }
@@ -23,6 +24,9 @@ export default function AuthForm({ title, miniTitle, miniButton, button, handleS
                 })
                 setErrors({ email: newErrors.email || "", password: newErrors.password || "" })
             }
+        }
+        finally {
+            setLoading(false)
         }
     }
     return (
@@ -44,10 +48,14 @@ export default function AuthForm({ title, miniTitle, miniButton, button, handleS
                         {errors.password && <span className="text-red-500 text-xs mt-[-7px]" >{errors.password}</span>}
                     </div>
                 </div>
+                <div>
+                    {errorMessage && <div className="text-red-500 text-sm mb-[-10px]">{errorMessage}</div>}
+                </div>
                 <div className="my-6 flex">
-                    <button onClick={onClickhandler} className="bg-black flex-1 text-white p-[10px] text-[18px] font-semibold rounded-md" type="submit">{button}</button>
+                    <button onClick={onClickhandler} className="bg-black flex-1 text-white p-[10px] text-[18px] font-semibold rounded-md" type="submit">{loading ? 'Loading...' : button}</button>
                 </div>
             </div>
+            <div className="my-6 flex"></div>
             <div className="bg-slate-100 h-96 text-center w-1/2 hidden md:block">
                 <div className="flex items-center h-full">
                     <p className="px-10">“Success is not final; failure is not fatal: It is the courage to continue that counts.” — <strong className="text-right">Winston Churchill</strong></p>

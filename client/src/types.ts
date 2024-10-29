@@ -15,5 +15,6 @@ export type AuthProp = {
     miniTitle: string
     miniButton: string
     button: string
+    errorMessage:string | null
     handleSubmit: (data: UserAuthType) => void
 }
