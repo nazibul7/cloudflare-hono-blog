@@ -14,6 +14,7 @@ export default function AuthForm({ title, miniTitle, miniButton, button, handleS
         try {
             const parseData = UserAuthSchema.parse(data)
             handleSubmit(parseData)
+            
         } catch (error) {
             if (error instanceof ZodError) {
                 const newErrors = { email: '', password: '' }
