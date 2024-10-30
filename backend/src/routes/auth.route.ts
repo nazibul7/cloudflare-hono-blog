@@ -26,23 +26,24 @@ auth.post('/signup', async (c) => {
         if (existingUser) {
             return c.text("User already exist")
         }
-        const token = await createToken(c, data)
+        const tokenGenerate = await createToken(c, data)
         const hashPassword = await bcrypt.hash(data.password, 10)
         const user = await prisma.user.create({
             data: {
                 email: data.email,
                 password: hashPassword,
-                token
+                token:tokenGenerate
             }
         })
-        setCookie(c, 'token', token, {
+        setCookie(c, 'token', tokenGenerate, {
             httpOnly: true,
             secure: true,
             path: '/',
             sameSite: "Strict",
             maxAge: 24 * 24 * 60
         })
-        return c.json(user, 200)
+        const {password,token,...remainingUaserData}=user
+        return c.json(remainingUaserData, 200)
     } catch (error) {
         if (error instanceof z.ZodError) {
             return c.json({ message: "Validation error", details: error.errors[0].message }, 400);
@@ -68,19 +69,20 @@ auth.post('/signin', async (c) => {
         if (data.email !== existingUser.email) {
             return c.json("Wrong email or User is not registered", 400)
         }
-        const password = await bcrypt.compare(data.password, existingUser.password)
-        if (!password) {
+        const passwordMatch = await bcrypt.compare(data.password, existingUser.password)
+        if (!passwordMatch) {
             return c.json("Password does not match", 403)
         }
-        const token = await createToken(c, existingUser)
-        setCookie(c, 'token', token, {
+        const tokenGenerate = await createToken(c, existingUser)
+        setCookie(c, 'token', tokenGenerate, {
             httpOnly: true,
             secure: true,
             path: '/',
             sameSite: "Strict",
             maxAge: 24 * 24 * 60
         })
-        return c.json({ message: "SignIn successfull", token }, 200)
+        const {password,token,...remainingUserData}=existingUser
+        return c.json({ message: "SignIn successfull", remainingUserData }, 200)
 
     } catch (error) {
         if (error instanceof ZodError) {
