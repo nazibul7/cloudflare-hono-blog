@@ -5,6 +5,7 @@ import { createToken } from '../utils/createToken';
 import z, { ZodError } from "zod"
 import { Bindings } from '../utils/types';
 import bcrypt from "bcryptjs"
+import { verifyToken } from '../middlewares/verifyToken';
 
 const auth = new Hono<{ Bindings: Bindings }>();
 
@@ -32,7 +33,7 @@ auth.post('/signup', async (c) => {
             data: {
                 email: data.email,
                 password: hashPassword,
-                token:tokenGenerate
+                token: tokenGenerate
             }
         })
         setCookie(c, 'token', tokenGenerate, {
@@ -42,7 +43,7 @@ auth.post('/signup', async (c) => {
             sameSite: "Strict",
             maxAge: 24 * 24 * 60
         })
-        const {password,token,...remainingUaserData}=user
+        const { password, token, ...remainingUaserData } = user
         return c.json(remainingUaserData, 200)
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -81,7 +82,7 @@ auth.post('/signin', async (c) => {
             sameSite: "Strict",
             maxAge: 24 * 24 * 60
         })
-        const {password,token,...remainingUserData}=existingUser
+        const { password, token, ...remainingUserData } = existingUser
         return c.json({ message: "SignIn successfull", remainingUserData }, 200)
 
     } catch (error) {
@@ -90,6 +91,25 @@ auth.post('/signin', async (c) => {
         } else {
             return c.json("Something went wrong while login user", 500);
         }
+    }
+})
+
+// User route
+
+auth.get('/', verifyToken, async (c) => {
+    try {
+        const data = c.req.user as string
+        const prisma = getPrisma(c.env.DATABASE_URL)
+        const user = await prisma.user.findUnique({
+            where: { email: data }
+        })
+        if(!user){
+            return c.json("User not found",404)
+        }
+        const {password,token,...restUserData}=user
+        return c.json(restUserData,200)
+    } catch (error) {
+        return c.json("Something went wronmg",500)
     }
 })
 export default auth;
