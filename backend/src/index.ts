@@ -9,7 +9,7 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use("*", async (c, next: Next) => {
   const a = cors({
     origin: c.env.CLIENT_URL,
-    credentials: true
+    credentials: true,
   })
   return a(c, next)
 })

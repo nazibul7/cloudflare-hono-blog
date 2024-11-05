@@ -40,7 +40,7 @@ auth.post('/signup', async (c) => {
             httpOnly: true,
             secure: true,
             path: '/',
-            sameSite: "Strict",
+            sameSite: "None",
             maxAge: 24 * 24 * 60
         })
         const { password, token, ...remainingUaserData } = user
@@ -79,7 +79,7 @@ auth.post('/signin', async (c) => {
             httpOnly: true,
             secure: true,
             path: '/',
-            sameSite: "Strict",
+            sameSite: "None",
             maxAge: 24 * 24 * 60
         })
         const { password, token, ...remainingUserData } = existingUser

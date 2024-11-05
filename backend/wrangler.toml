@@ -9,7 +9,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [vars]
 DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiMDZhNzJjNTgtNTYyNC00MTk5LTllZTEtNjA3YjQ1YWRiNmFlIiwidGVuYW50X2lkIjoiOGJmY2I5YTA2YjRiYmFkMTg0ZjE2NzY2MDQ0N2UwMjkyNjIwZGFlYTIzMjA2OGIzZDM4YWUyYTJjOWU4YmJhZCIsImludGVybmFsX3NlY3JldCI6ImEyYzAyNjQwLWEyYzEtNDY5Yy04OWEwLThjZjQ5ZmY3NDlhNSJ9.wvtAtP7ILiuun3DMHIYepMTV48mefTZuKzplU51cVC0"
 JWT_SECRET_KEY="My_Secret_Private_Key"
-CLIENT_URL="http://localhost:5173"
+CLIENT_URL=["http://localhost:5173","https://cloudflare-hono-blog.pages.dev"]
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
