@@ -20,6 +20,7 @@ export default function Home() {
                 const data=await response.data
                 setEmail(data.email)
             } catch (error) {
+                navigate('/signin')
                 console.log(error);
             }
         }
@@ -27,7 +28,7 @@ export default function Home() {
     },[])
     return (
         <div className="flex justify-between px-10 py-5">
-            <div>Medium</div>
+            <div className="font-light text-2xl ">Medium</div>
             <div className="border px-3 py-1 text-white bg-black rounded-full">{email.toString().charAt(0)}</div>
         </div>
     )
