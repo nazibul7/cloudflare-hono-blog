@@ -29,7 +29,7 @@ export default function Home() {
     return (
         <div className="flex justify-between px-10 py-5">
             <div className="font-light text-2xl ">Medium</div>
-            <div className="border px-3 py-1 text-white bg-black rounded-full">{email.toString().charAt(0)}</div>
+            <div className="border px-3 py-1 text-white bg-black rounded-full">{email?.toString().charAt(0)}</div>
         </div>
     )
 }
