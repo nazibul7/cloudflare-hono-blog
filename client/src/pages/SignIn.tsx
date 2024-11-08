@@ -8,7 +8,7 @@ import { UserContext } from '../context/UserContext'
 export default function SignIn() {
     const navigate = useNavigate()
     const signin = useSignin()
-    const { email, setEmail } = useContext(UserContext)
+    const { setEmail } = useContext(UserContext)
     const [error, setError] = useState<string | null>(null)
     const handleSignin = async (data: { email: string, password: string }) => {
         try {
