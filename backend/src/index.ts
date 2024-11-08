@@ -7,11 +7,19 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 //Added Allowed Cors 
 app.use("*", async (c, next: Next) => {
-  const a = cors({
-    origin: c.env.CLIENT_URL,
-    credentials: true,
-  })
-  return a(c, next)
+  const allowedOrigins = c.env.CLIENT_URL.split(",");
+  const origin = c.req.header("Origin") as string;
+
+  if (allowedOrigins.includes(origin)) {
+    cors({
+      origin: origin,
+      credentials: true,
+    })(c, next);
+  } else {
+    return c.json("CORS policy does not allow this origin", 403);
+  }
+
+  await next();
 })
 // Use the auth routes as middleware
 app.route('/auth', authRoutes);
