@@ -1,0 +1,20 @@
+In both Hono and Express, the CORS middleware behaves differently in terms of how async and next are handled.
+
+1. CORS Middleware in Express
+In Express, the CORS middleware (usually implemented via the cors package) is synchronous and does not explicitly return a Promise. This means it doesn’t need to be marked as async, and it automatically calls next() internally when it finishes setting the CORS headers.
+
+For most requests, cors() sets the appropriate headers and then calls next() to pass control to the next middleware or route handler.
+For preflight OPTIONS requests, cors() can handle and respond directly, skipping the next() call to avoid further processing (e.g., reaching your route handler).
+Thus, in Express, CORS is generally synchronous, and next() is automatically called as needed by the CORS package itself.
+
+2. CORS Middleware in Hono
+In Hono, the middleware pattern is async-first, which means functions typically return a Promise and work well in asynchronous contexts. However, the CORS middleware in Hono is usually not inherently asynchronous; it only becomes async if you need to perform async operations (like fetching origins from an external service).
+
+Similar to Express, the CORS middleware in Hono often calls next() directly after setting the CORS headers if it’s a non-preflight request.
+In cases where async logic is involved (e.g., dynamically setting origins), you may need to explicitly return the result of the cors middleware function to ensure the promise resolves, and only then next() is called.
+So, in Hono, CORS is often synchronous and calls next() automatically in most cases, but it can support asynchronous behavior if needed.
+
+Summary
+Express: The CORS middleware is synchronous, and next() is handled automatically.
+Hono: The CORS middleware can be synchronous or asynchronous. If asynchronous logic is used, you may need to return the middleware function, but generally, next() is handled automatically.
+In both frameworks, you rarely need to explicitly manage next() in standard CORS middleware usage.
